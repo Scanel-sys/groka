@@ -1,3 +1,16 @@
+int min(int a, int b)
+{
+    if(a < b)
+        return a;
+    return b;
+}
+int max(int a, int b)
+{
+    if (a > b)
+        return a;
+    return b; 
+}
+
 int * arr_init(int *size)
 {    
     printf("Size of array: ");
@@ -237,6 +250,38 @@ void Deikstra(struct queue *q, int **adj_mat, int *handled_ones, struct edge_inf
     }
 }
 
+int vorishka(int ** matrix, struct store_item * items, int items_number, int backpack_size)
+{
+    for(int y = 0; y < items_number; y++)
+    {
+        for(int x = 0; x < backpack_size; x++)
+        {
+            if(y == 0)
+            {
+                if(items[y].weight <= x + 1)
+                    matrix[y][x] = items[y].cost;
+                else
+                    matrix[y][x] = 0;
+            }
+            else
+            {
+                if(items[y].weight <= x + 1)
+                {
+                    if(x - items[y].weight >= 0)
+                        matrix[y][x] = max(matrix[y-1][x - items[y].weight] + items[y].cost, max(items[y].cost, matrix[y-1][x]));
+                    else
+                        matrix[y][x] = max(items[y].cost, matrix[y-1][x]);
+                }
+                else
+                    matrix[y][x] = matrix[y - 1][x];
+            }
+            printf("%d ", matrix[y][x]);
+        }
+        printf("\n");
+    }
+    return matrix[items_number - 1][backpack_size - 1];
+}
+
 
 void try_bin_search()
 {
@@ -326,5 +371,37 @@ void try_deikstra()
 
     free(q);
     free(adj_matrix);
+    free(costs);
     free(handled_ones);
+}
+
+void try_vorishka()
+{
+    int items_number, backpack_size;
+    printf("number of items: ");
+    scanf("%d", &items_number);
+    struct store_item *items = (struct store_item *)malloc(sizeof(struct store_item) * items_number);
+
+    for(int i = 0; i < items_number; i++)
+    {
+        printf("%d item cost : ", i);
+        scanf("%d", &items[i].cost);
+        printf("%d item weight : ", i);
+        scanf("%d", &items[i].weight);
+    }
+
+    printf("\nbackpack size: ");
+    scanf("%d", &backpack_size);
+
+    int ** matrix = (int **)malloc(sizeof(int *) * items_number);
+    for(int i = 0; i < items_number; i++)
+        matrix[i] = (int *)malloc(sizeof(int) * backpack_size);
+
+    
+    int out = vorishka(matrix, items, items_number, backpack_size);
+
+    printf("max price : %d", out);
+
+    free(items);
+    free(matrix);
 }
